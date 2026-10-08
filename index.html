@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swaad — Find Your India</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2B1620;
+    --panel:#3A2029;
+    --panel-2:#43242F;
+    --cream:#F3E9DC;
+    --cream-dim:#D9C9B4;
+    --turmeric:#E0A73B;
+    --turmeric-dark:#B9822A;
+    --chili:#C4432B;
+    --chili-dark:#8F2E1C;
+    --curry:#5B8C5A;
+    --curry-dark:#3E6B3D;
+    --teal:#3E7C7B;
+    --teal-dark:#2A5857;
+    --line: rgba(243,233,220,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .swaad-app{
+    background: var(--ink);
+    color: var(--cream);
+    font-family:'Work Sans', sans-serif;
+    padding: 40px 24px 56px;
+    border-radius: 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .swaad-app::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 8% 12%, rgba(224,167,59,0.10) 0, transparent 40%),
+      radial-gradient(circle at 92% 85%, rgba(196,67,43,0.10) 0, transparent 42%);
+    pointer-events:none;
+  }
+  .wrap{ max-width: 900px; margin: 0 auto; position:relative; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--turmeric);
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background: var(--turmeric); display:inline-block; }
+
+  h1.title{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size: clamp(34px, 6vw, 54px);
+    line-height:1.04;
+    margin: 0 0 14px;
+    color: var(--cream);
+  }
+  h1.title em{
+    font-style:normal;
+    color: var(--turmeric);
+  }
+  .sub{
+    font-size:16px; line-height:1.6; color: var(--cream-dim);
+    max-width: 580px; margin: 0 0 8px;
+  }
+  .sub2{
+    font-size: 13px; color: var(--teal); margin: 0 0 34px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .step-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color: var(--teal);
+    margin: 0 0 10px;
+  }
+  .section{ margin-bottom: 40px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  h2.h{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:21px; margin:0; color: var(--cream);
+  }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:10px; }
+  .chips.scrollset{
+    max-height: 190px; overflow-y:auto; padding: 4px 4px 4px 0;
+    border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+  }
+  .chip{
+    font-family:'Work Sans', sans-serif; font-weight:500; font-size:14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--cream-dim);
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: all .15s ease;
+    user-select:none;
+  }
+  .chip:hover{ border-color: var(--turmeric); color: var(--cream); }
+  .chip.active{
+    background: var(--turmeric);
+    border-color: var(--turmeric);
+    color: #2A1B08;
+    font-weight:600;
+  }
+  .chip.active.veg{ background: var(--curry); border-color: var(--curry); color:#12210F; }
+  .chip.active.nonveg{ background: var(--chili); border-color: var(--chili); color:#2E0E06; }
+
+  .wheel-zone{
+    display:flex; align-items:center; gap:36px; flex-wrap:wrap;
+  }
+  .wheel{
+    position:relative;
+    width: 260px; height: 260px;
+    flex: 0 0 auto;
+  }
+  .wheel-center{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width: 92px; height:92px; border-radius:50%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:13px;
+    color: var(--turmeric);
+    line-height:1.2;
+  }
+  .spice-btn{
+    position:absolute;
+    width: 84px; height: 84px;
+    border-radius:50%;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--cream-dim);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:4px;
+    cursor:pointer;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
+    font-family:'Work Sans', sans-serif;
+  }
+  .spice-btn .ic{ font-size:22px; line-height:1; }
+  .spice-btn .lb{ font-size:11px; font-weight:600; letter-spacing:.02em; }
+  .spice-btn:hover{ transform: scale(1.06); border-color: var(--turmeric); }
+  .spice-btn.on{
+    background: var(--turmeric);
+    border-color: var(--turmeric);
+    color: #2A1B08;
+    transform: scale(1.08);
+  }
+  .wheel-hint{
+    max-width: 260px; font-size:14px; color: var(--cream-dim); line-height:1.6;
+  }
+  .wheel-hint .picked{
+    margin-top:14px; font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--turmeric);
+    min-height:16px;
+  }
+
+  .cta-row{ display:flex; align-items:center; gap:16px; margin-top: 8px; flex-wrap:wrap; }
+  .cta{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700; font-size:16px;
+    background: var(--chili);
+    color: #FBEAE3;
+    border:none;
+    padding: 15px 30px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .cta:hover{ background: var(--chili-dark); transform: translateY(-1px); }
+  .cta:active{ transform: translateY(0); }
+  .cta.ghost{
+    background: transparent; border: 1px solid var(--line); color: var(--cream-dim);
+  }
+  .cta.ghost:hover{ border-color: var(--turmeric); color: var(--cream); }
+  .cta.tour{
+    background: var(--teal); color:#0D2120;
+  }
+  .cta.tour:hover{ background: var(--teal-dark); color: var(--cream); }
+
+  .results{ margin-top: 46px; }
+  .results-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  .results-count{ font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--teal); }
+  .empty{
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    padding: 34px 24px;
+    text-align:center;
+    color: var(--cream-dim);
+    font-size:14px;
+  }
+  .empty .big{ font-family:'Baloo 2', sans-serif; font-size:18px; color: var(--cream); margin-bottom:6px; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px 4px 40px 4px;
+    padding: 20px 20px 18px;
+    display:flex; flex-direction:column; gap:10px;
+    position:relative;
+  }
+  .card .region{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color: var(--turmeric); opacity:.9;
+  }
+  .card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .card .dish{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:18px; color: var(--cream);
+    line-height:1.2;
+  }
+  .card .price{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:500;
+    background: var(--panel-2); color: var(--turmeric);
+    padding: 4px 9px; border-radius: 6px; white-space:nowrap;
+  }
+  .card .place{ font-size:13px; color: var(--cream-dim); }
+  .card .place b{ color: var(--cream); font-weight:600; }
+  .card .blurb{ font-size:13px; line-height:1.55; color: var(--cream-dim); flex:1; }
+  .card .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+  .tag{
+    font-size:11px; font-family:'IBM Plex Mono', monospace;
+    padding: 3px 8px; border-radius: 5px;
+    border: 1px solid var(--line); color: var(--cream-dim);
+  }
+  .tag.veg{ color: var(--curry); border-color: rgba(91,140,90,0.4); }
+  .tag.nonveg{ color: var(--chili); border-color: rgba(196,67,43,0.4); }
+  .card .foot{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color: var(--cream-dim); margin-top:4px; padding-top:10px; border-top:1px solid var(--line); }
+
+  .foot-note{
+    margin-top: 34px; font-size: 12px; color: var(--cream-dim); line-height:1.6;
+    border-top: 1px solid var(--line); padding-top:18px;
+  }
+
+  @media (max-width: 520px){
+    .wheel-zone{ flex-direction:column; }
+    .wheel{ margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+<div class="swaad-app">
+<div class="wrap">
+
+  <div class="eyebrow">बॉट · भारत · भोजन</div>
+  <h1 class="title">What's your <em>swaad</em><br>today?</h1>
+  <p class="sub">Tell this bot how you like your food, your state and your budget — it'll point you to real dishes and restaurants across India. Built only for eating your way through India.</p>
+  <p class="sub2" id="coverageNote">Covering dishes from all 28 states + 8 union territories.</p>
+
+  <div class="section">
+    <p class="step-label">Step 1 — Where are you</p>
+    <div class="section-head"><h2 class="h">Pick a state or UT</h2></div>
+    <div class="chips scrollset" id="cityChips"></div>
+  </div>
+
+  <div class="section">
+    <p class="step-label">Step 2 — The masala dabba</p>
+    <div class="section-head"><h2 class="h">Spin what your tongue wants</h2></div>
+    <div class="wheel-zone">
+      <div class="wheel" id="wheel"></div>
+      <div class="wheel-hint">
+        Tap one or more spice pots. Each one nudges the recommendations toward that flavour — spicy, tangy, sweet, smoky or mild &amp; creamy.
+        <div class="picked" id="pickedTastes">No flavour selected yet — showing everything.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="step-label">Step 3 — Your plate</p>
+    <div class="section-head"><h2 class="h">Veg, non-veg, or both</h2></div>
+    <div class="chips" id="vegChips"></div>
+  </div>
+
+  <div class="section">
+    <p class="step-label">Step 4 — Your pocket</p>
+    <div class="section-head"><h2 class="h">Budget per person</h2></div>
+    <div class="chips" id="budgetChips"></div>
+  </div>
+
+  <div class="cta-row">
+    <button class="cta" id="findBtn">Find my food →</button>
+    <button class="cta ghost" id="surpriseBtn">Surprise me instead</button>
+    <button class="cta tour ghost" id="tourBtn">Tour all states (1 dish each)</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="empty">
+      <div class="big">Your plate is empty</div>
+      Set your state, taste and budget above, then hit "Find my food".
+    </div>
+  </div>
+
+  <div class="foot-note">
+    Restaurant names are well-known local landmarks for each dish — always confirm hours, exact prices and availability before you go, as these can change. Prices shown are rough per-person estimates in Indian Rupees (₹) to help first-time visitors gauge cost, not fixed menu prices.
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  var DATA = [
+    // Delhi (UT)
+    {region:"Delhi", dish:"Butter Chicken", place:"Moti Mahal, Daryaganj", cuisine:"North Indian / Mughlai", veg:"nonveg", budget:2, price:"₹450–650", tastes:["creamy","smoky"], blurb:"The dish that started it all — tandoor-charred chicken simmered in a buttery tomato gravy."},
+    {region:"Delhi", dish:"Chole Bhature", place:"Sita Ram Diwan Chand", cuisine:"North Indian", veg:"veg", budget:1, price:"₹120–200", tastes:["spicy","tangy"], blurb:"Fluffy fried bread with a fiery, tamarind-sharp chickpea curry."},
+    {region:"Delhi", dish:"Chaat Platter", place:"Prabhu Chaat Bhandar, CP", cuisine:"Street food", veg:"veg", budget:1, price:"₹80–150", tastes:["tangy","spicy","sweet"], blurb:"Crisp, tangy, sweet and hot all in one bite — the street snack that sums up Delhi."},
+
+    // Maharashtra
+    {region:"Maharashtra", dish:"Vada Pav", place:"Ashok Vada Pav, Dadar, Mumbai", cuisine:"Street food", veg:"veg", budget:1, price:"₹20–40", tastes:["spicy","tangy"], blurb:"Mumbai's answer to the burger — a spiced potato fritter jammed into a soft bun."},
+    {region:"Maharashtra", dish:"Pav Bhaji", place:"Sardar Pav Bhaji, Tardeo, Mumbai", cuisine:"Street food", veg:"veg", budget:1, price:"₹150–250", tastes:["spicy","creamy"], blurb:"Buttery mashed vegetable curry mopped up with toasted bread rolls."},
+    {region:"Maharashtra", dish:"Koliwada Prawns & Curry", place:"Trishna, Fort, Mumbai", cuisine:"Coastal", veg:"nonveg", budget:3, price:"₹1200–2000", tastes:["spicy","tangy"], blurb:"Iconic seafood house — go for the butter garlic crab if it's on the menu."},
+
+    // Rajasthan
+    {region:"Rajasthan", dish:"Dal Baati Churma", place:"Laxmi Misthan Bhandar (LMB), Jaipur", cuisine:"Rajasthani", veg:"veg", budget:2, price:"₹300–450", tastes:["mild","sweet"], blurb:"Baked wheat balls cracked open and drenched in ghee, dal and sweet churma."},
+    {region:"Rajasthan", dish:"Laal Maas", place:"Handi Restaurant, MI Road, Jaipur", cuisine:"Rajasthani", veg:"nonveg", budget:2, price:"₹450–650", tastes:["spicy","smoky"], blurb:"Fiery red-chilli mutton curry from the Rajput royal kitchens."},
+
+    // West Bengal
+    {region:"West Bengal", dish:"Kolkata Kathi Roll", place:"Nizam's, New Market, Kolkata", cuisine:"Street food", veg:"nonveg", budget:1, price:"₹100–200", tastes:["spicy","smoky"], blurb:"The original egg-wrapped kebab roll, said to be invented right here."},
+    {region:"West Bengal", dish:"Macher Jhol (Fish Curry)", place:"Bhojohori Manna, Kolkata", cuisine:"Bengali", veg:"nonveg", budget:2, price:"₹350–500", tastes:["tangy","mild"], blurb:"Light mustard-and-turmeric fish curry, served over steamed rice."},
+    {region:"West Bengal", dish:"Rosogolla & Mishti Doi", place:"K.C. Das, Esplanade, Kolkata", cuisine:"Bengali sweets", veg:"veg", budget:1, price:"₹10–30 per piece", tastes:["sweet"], blurb:"Spongy cottage-cheese balls in syrup, and a set sweet yoghurt to finish."},
+
+    // Tamil Nadu
+    {region:"Tamil Nadu", dish:"Masala Dosa & Filter Coffee", place:"Saravana Bhavan, Chennai", cuisine:"South Indian", veg:"veg", budget:1, price:"₹100–180", tastes:["mild","tangy"], blurb:"Crisp rice-lentil crepe stuffed with spiced potato, best with three chutneys."},
+    {region:"Tamil Nadu", dish:"Chettinad Chicken", place:"Anjappar, Chennai", cuisine:"Chettinad", veg:"nonveg", budget:2, price:"₹350–550", tastes:["spicy","smoky"], blurb:"Roasted-spice chicken curry from Tamil Nadu's most fiery regional cuisine."},
+
+    // Telangana
+    {region:"Telangana", dish:"Hyderabadi Biryani", place:"Paradise, Secunderabad, Hyderabad", cuisine:"Hyderabadi", veg:"nonveg", budget:2, price:"₹300–500", tastes:["spicy","smoky"], blurb:"Layered rice and slow-cooked meat sealed and steamed in its own aromatic gravy."},
+    {region:"Telangana", dish:"Haleem", place:"Bawarchi, RTC X Roads, Hyderabad", cuisine:"Hyderabadi", veg:"nonveg", budget:2, price:"₹250–400", tastes:["mild","creamy"], blurb:"Slow-pounded wheat, lentil and meat stew, rich and almost porridge-like."},
+
+    // Punjab
+    {region:"Punjab", dish:"Amritsari Kulcha", place:"Kesar Da Dhaba, Amritsar", cuisine:"Punjabi", veg:"veg", budget:1, price:"₹120–220", tastes:["spicy","creamy"], blurb:"Stuffed tandoori bread swimming in white butter, paired with spiced chickpeas."},
+    {region:"Punjab", dish:"Sarson da Saag & Makki Roti", place:"Kesar Da Dhaba, Amritsar", cuisine:"Punjabi", veg:"veg", budget:1, price:"₹150–250", tastes:["mild","creamy"], blurb:"Slow-cooked mustard greens with a knob of ghee, eaten with cornflour flatbread."},
+
+    // Goa
+    {region:"Goa", dish:"Goan Fish Curry Rice", place:"Fisherman's Wharf, Panjim", cuisine:"Goan", veg:"nonveg", budget:2, price:"₹350–550", tastes:["tangy","spicy"], blurb:"Coconut-and-kokum fish curry — the everyday meal of the Goan coast."},
+    {region:"Goa", dish:"Pork Vindaloo", place:"Vinayak Family Restaurant, Assagao", cuisine:"Goan", veg:"nonveg", budget:2, price:"₹400–600", tastes:["spicy","tangy"], blurb:"Portuguese-Goan vinegar-and-chilli pork stew, sharp and deeply savoury."},
+    {region:"Goa", dish:"Bebinca", place:"Local bakeries, Panjim", cuisine:"Goan dessert", veg:"veg", budget:1, price:"₹50–120", tastes:["sweet"], blurb:"Sixteen-layer coconut-jaggery cake, baked one layer at a time."},
+
+    // Gujarat
+    {region:"Gujarat", dish:"Dhokla & Thepla", place:"Das Khaman House, Ahmedabad", cuisine:"Gujarati", veg:"veg", budget:1, price:"₹80–150", tastes:["tangy","mild"], blurb:"Steamed, spongy gram-flour cake with a tempered chilli-mustard tadka."},
+    {region:"Gujarat", dish:"Undhiyu", place:"Agashiye, Ahmedabad", cuisine:"Gujarati", veg:"veg", budget:2, price:"₹200–350", tastes:["mild","sweet"], blurb:"Winter mixed-vegetable casserole slow-cooked with a sweet-savoury spice blend."},
+
+    // Karnataka
+    {region:"Karnataka", dish:"Bisi Bele Bath", place:"Vidyarthi Bhavan, Bengaluru", cuisine:"Karnataka", veg:"veg", budget:1, price:"₹80–150", tastes:["spicy","tangy"], blurb:"A hot, tangy rice-lentil-vegetable one-pot, topped with ghee and fried cashews."},
+    {region:"Karnataka", dish:"Mysore Masala Dosa", place:"Vinayaka Mylari, Mysuru", cuisine:"Karnataka", veg:"veg", budget:1, price:"₹60–120", tastes:["spicy","mild"], blurb:"A red-chutney-smeared dosa, crisper and spicier than its Chennai cousin."},
+
+    // Kerala
+    {region:"Kerala", dish:"Appam & Stew", place:"Kayees Rahmathulla Hotel, Kozhikode", cuisine:"Kerala", veg:"nonveg", budget:2, price:"₹150–280", tastes:["mild","creamy"], blurb:"Lacy, fermented rice pancakes with a gently spiced coconut-milk meat stew."},
+    {region:"Kerala", dish:"Kerala Sadya", place:"Hotel Saravana Bhavan, Kochi", cuisine:"Kerala", veg:"veg", budget:2, price:"₹250–400", tastes:["sweet","mild"], blurb:"A banana-leaf feast of 15+ small dishes — rice, sambar, avial, payasam and more."},
+
+    // Madhya Pradesh
+    {region:"Madhya Pradesh", dish:"Poha Jalebi", place:"Sarafa Bazaar, Indore", cuisine:"Madhya Pradesh", veg:"veg", budget:1, price:"₹40–90", tastes:["sweet","tangy"], blurb:"Indore's iconic breakfast pairing — spiced flattened rice with a crisp sugar-syrup jalebi."},
+    {region:"Madhya Pradesh", dish:"Bhutte ka Kees", place:"Sarafa Bazaar, Indore", cuisine:"Madhya Pradesh", veg:"veg", budget:1, price:"₹50–100", tastes:["mild","spicy"], blurb:"Grated corn cooked with milk and mustard tempering — a Malwa specialty."},
+
+    // Uttar Pradesh
+    {region:"Uttar Pradesh", dish:"Tunday Kababi Galouti Kebab", place:"Tunday Kababi, Lucknow", cuisine:"Awadhi", veg:"nonveg", budget:2, price:"₹250–450", tastes:["smoky","spicy"], blurb:"Melt-in-the-mouth minced mutton kebabs, a century-old Lucknow secret recipe."},
+    {region:"Uttar Pradesh", dish:"Lucknawi Biryani", place:"Idris Biryani, Lucknow", cuisine:"Awadhi", veg:"nonveg", budget:2, price:"₹250–400", tastes:["spicy","creamy"], blurb:"Gently spiced, dum-cooked biryani in the mellower Awadhi style."},
+
+    // Bihar
+    {region:"Bihar", dish:"Litti Chokha", place:"Ram Briksh Bhojnalaya, Patna", cuisine:"Bihari", veg:"veg", budget:1, price:"₹100–180", tastes:["smoky","spicy"], blurb:"Roasted wheat balls stuffed with sattu, served with smashed spiced vegetables."},
+
+    // Jharkhand
+    {region:"Jharkhand", dish:"Dhuska with Ghugni", place:"Local eateries, Ranchi", cuisine:"Jharkhandi", veg:"veg", budget:1, price:"₹60–120", tastes:["spicy","smoky"], blurb:"Deep-fried rice-lentil pancakes served with a spiced black-chana curry."},
+
+    // Odisha
+    {region:"Odisha", dish:"Dalma & Chhena Poda", place:"Dalma Restaurant, Bhubaneswar", cuisine:"Odia", veg:"veg", budget:1, price:"₹120–220", tastes:["mild","sweet"], blurb:"A comforting lentil-vegetable dal, followed by a caramelised baked cheese dessert."},
+
+    // Chhattisgarh
+    {region:"Chhattisgarh", dish:"Chila & Fara", place:"Local eateries, Raipur", cuisine:"Chhattisgarhi", veg:"veg", budget:1, price:"₹50–100", tastes:["mild"], blurb:"Rice-flour crepes and steamed rice-lentil dumplings, a simple everyday plate."},
+
+    // Assam
+    {region:"Assam", dish:"Masor Tenga (Sour Fish Curry)", place:"Paradise Restaurant, Guwahati", cuisine:"Assamese", veg:"nonveg", budget:2, price:"₹200–350", tastes:["tangy","mild"], blurb:"A light, tomato-and-lemon soured fish curry, eaten with plain rice."},
+
+    // Himachal Pradesh
+    {region:"Himachal Pradesh", dish:"Himachali Dham", place:"Local dhabas, Shimla", cuisine:"Himachali", veg:"veg", budget:1, price:"₹150–250", tastes:["mild","creamy"], blurb:"A festive thali of rice, rajma-madra, curd curry and lentils cooked without onion-garlic."},
+
+    // Uttarakhand
+    {region:"Uttarakhand", dish:"Kafuli & Bhatt ki Churkani", place:"Local eateries, Almora", cuisine:"Kumaoni", veg:"veg", budget:1, price:"₹100–180", tastes:["mild"], blurb:"A leafy-green gravy and black soybean curry from the Kumaon hills."},
+
+    // Haryana
+    {region:"Haryana", dish:"Bajra Khichdi & Kadhi Pakora", place:"Local dhabas, Karnal", cuisine:"Haryanvi", veg:"veg", budget:1, price:"₹100–180", tastes:["mild","creamy"], blurb:"Rustic millet khichdi with a tangy yoghurt-and-gram-flour dumpling curry."},
+
+    // Jammu & Kashmir
+    {region:"Jammu & Kashmir", dish:"Rogan Josh (Wazwan)", place:"Ahdoos, Srinagar", cuisine:"Kashmiri", veg:"nonveg", budget:2, price:"₹350–550", tastes:["spicy","smoky"], blurb:"Slow-braised mutton in a Kashmiri-chilli red gravy, part of the famous Wazwan feast."},
+
+    // Ladakh
+    {region:"Ladakh", dish:"Thukpa & Skyu", place:"Local eateries, Leh", cuisine:"Ladakhi", veg:"veg", budget:1, price:"₹120–220", tastes:["mild"], blurb:"Warming noodle and hand-pinched pasta soups, built for Ladakh's cold, thin air."},
+
+    // Sikkim
+    {region:"Sikkim", dish:"Momos & Thukpa", place:"Local eateries, Gangtok", cuisine:"Sikkimese", veg:"nonveg", budget:1, price:"₹100–200", tastes:["mild","spicy"], blurb:"Steamed dumplings with a fiery chilli dip, alongside a noodle soup to warm up."},
+
+    // Meghalaya
+    {region:"Meghalaya", dish:"Jadoh", place:"Local eateries, Shillong", cuisine:"Khasi", veg:"nonveg", budget:1, price:"₹100–200", tastes:["spicy","smoky"], blurb:"Smoky rice cooked in pork blood and meat stock — a Khasi tribal staple."},
+
+    // Nagaland
+    {region:"Nagaland", dish:"Smoked Pork with Bamboo Shoot", place:"Local eateries, Kohima", cuisine:"Naga", veg:"nonveg", budget:2, price:"₹200–350", tastes:["smoky","spicy"], blurb:"Fermented bamboo shoot and king chilli give this smoked pork dish real heat."},
+
+    // Manipur
+    {region:"Manipur", dish:"Eromba", place:"Local eateries, Imphal", cuisine:"Manipuri", veg:"nonveg", budget:1, price:"₹100–180", tastes:["spicy","smoky"], blurb:"Mashed vegetables and fermented fish, a pungent, bold Manipuri comfort dish."},
+
+    // Mizoram
+    {region:"Mizoram", dish:"Bai (Vegetable Stew)", place:"Local eateries, Aizawl", cuisine:"Mizo", veg:"veg", budget:1, price:"₹100–180", tastes:["mild"], blurb:"A simple boiled-vegetable stew, lightly fermented — Mizo home cooking at its plainest and best."},
+
+    // Tripura
+    {region:"Tripura", dish:"Mui Borok (Bamboo Shoot Fish)", place:"Local eateries, Agartala", cuisine:"Tripuri", veg:"nonveg", budget:1, price:"₹120–220", tastes:["tangy","smoky"], blurb:"Fish cooked with fermented bamboo shoot for a sharp, distinctive sourness."},
+
+    // Arunachal Pradesh
+    {region:"Arunachal Pradesh", dish:"Thukpa & Momos", place:"Local eateries, Itanagar", cuisine:"Arunachali", veg:"veg", budget:1, price:"₹100–180", tastes:["mild"], blurb:"Tibetan-influenced noodle soups and dumplings, common across the eastern Himalayas."},
+
+    // Andaman & Nicobar Islands
+    {region:"Andaman & Nicobar", dish:"Grilled Seafood Platter", place:"New Lighthouse Restaurant, Port Blair", cuisine:"Island seafood", veg:"nonveg", budget:2, price:"₹400–700", tastes:["mild","tangy"], blurb:"Fresh-off-the-boat fish and prawns, grilled simply with local spices."},
+
+    // Lakshadweep
+    {region:"Lakshadweep", dish:"Tuna Curry", place:"Local eateries, Kavaratti", cuisine:"Island seafood", veg:"nonveg", budget:2, price:"₹250–450", tastes:["spicy","tangy"], blurb:"Coconut-based tuna curry reflecting Lakshadweep's Malabar-coast roots."},
+
+    // Puducherry
+    {region:"Puducherry", dish:"Meen Kuzhambu with French Quarter Café Fare", place:"Rendezvous, Puducherry", cuisine:"Franco-Tamil", veg:"nonveg", budget:2, price:"₹300–500", tastes:["tangy","spicy"], blurb:"Tangy Tamil fish curry alongside a French-colonial café scene — a genuinely two-cuisine town."},
+
+    // Dadra & Nagar Haveli and Daman & Diu
+    {region:"Daman & Diu", dish:"Goan-Portuguese Style Seafood", place:"Local eateries, Daman", cuisine:"Coastal Portuguese-influenced", veg:"nonveg", budget:2, price:"₹300–500", tastes:["tangy","spicy"], blurb:"Vinegar-and-chilli marinated seafood, a legacy of Daman's Portuguese colonial past."},
+
+    // Chandigarh
+    {region:"Chandigarh", dish:"Makhani Dal & Kulcha", place:"Highway dhabas, Chandigarh", cuisine:"North Indian", veg:"veg", budget:1, price:"₹150–250", tastes:["creamy","mild"], blurb:"Slow-simmered buttery black lentils, the classic highway-dhaba comfort dish of the region."}
+  ];
+
+  var STATES = ["All India","Delhi","Maharashtra","Rajasthan","West Bengal","Tamil Nadu","Telangana","Punjab","Goa",
+    "Gujarat","Karnataka","Kerala","Madhya Pradesh","Uttar Pradesh","Bihar","Jharkhand","Odisha","Chhattisgarh",
+    "Assam","Himachal Pradesh","Uttarakhand","Haryana","Jammu & Kashmir","Ladakh","Sikkim","Meghalaya","Nagaland",
+    "Manipur","Mizoram","Tripura","Arunachal Pradesh","Andaman & Nicobar","Lakshadweep","Puducherry","Daman & Diu","Chandigarh"];
+
+  var TASTES = [
+    {id:"spicy", ic:"🌶️", lb:"Spicy"},
+    {id:"tangy", ic:"🍋", lb:"Tangy"},
+    {id:"sweet", ic:"🍯", lb:"Sweet"},
+    {id:"creamy", ic:"🥥", lb:"Mild & creamy"},
+    {id:"smoky", ic:"🔥", lb:"Smoky"}
+  ];
+  var BUDGETS = [
+    {id:0, lb:"Any budget"},
+    {id:1, lb:"₹ Budget (under ~₹250)"},
+    {id:2, lb:"₹₹ Mid (~₹250–700)"},
+    {id:3, lb:"₹₹₹ Premium (~₹700+)"}
+  ];
+
+  var state = { city:"All India", tastes:new Set(), veg:"any", budget:0 };
+
+  document.getElementById('coverageNote').textContent =
+    "Covering " + (STATES.length - 1) + " states & union territories, " + DATA.length + " dishes and counting.";
+
+  var cityChips = document.getElementById('cityChips');
+  STATES.forEach(function(c){
+    var el = document.createElement('div');
+    el.className = 'chip' + (c===state.city ? ' active' : '');
+    el.textContent = c;
+    el.onclick = function(){
+      state.city = c;
+      Array.prototype.forEach.call(cityChips.children, function(ch){ ch.classList.remove('active'); });
+      el.classList.add('active');
+    };
+    cityChips.appendChild(el);
+  });
+
+  var vegChips = document.getElementById('vegChips');
+  [{id:"any", lb:"Both"},{id:"veg", lb:"Vegetarian"},{id:"nonveg", lb:"Non-vegetarian"}].forEach(function(v){
+    var el = document.createElement('div');
+    el.className = 'chip' + (v.id==='any' ? ' active' : '');
+    el.textContent = v.lb;
+    el.onclick = function(){
+      state.veg = v.id;
+      Array.prototype.forEach.call(vegChips.children, function(ch){ ch.classList.remove('active','veg','nonveg'); });
+      el.classList.add('active');
+      if(v.id==='veg') el.classList.add('veg');
+      if(v.id==='nonveg') el.classList.add('nonveg');
+    };
+    vegChips.appendChild(el);
+  });
+
+  var budgetChips = document.getElementById('budgetChips');
+  BUDGETS.forEach(function(b){
+    var el = document.createElement('div');
+    el.className = 'chip' + (b.id===0 ? ' active' : '');
+    el.textContent = b.lb;
+    el.onclick = function(){
+      state.budget = b.id;
+      Array.prototype.forEach.call(budgetChips.children, function(ch){ ch.classList.remove('active'); });
+      el.classList.add('active');
+    };
+    budgetChips.appendChild(el);
+  });
+
+  var wheel = document.getElementById('wheel');
+  var center = document.createElement('div');
+  center.className = 'wheel-center';
+  center.textContent = 'masala dabba';
+  wheel.appendChild(center);
+
+  var R = 95;
+  TASTES.forEach(function(t, i){
+    var angle = (i / TASTES.length) * 2 * Math.PI - Math.PI/2;
+    var x = 130 + R * Math.cos(angle) - 42;
+    var y = 130 + R * Math.sin(angle) - 42;
+    var btn = document.createElement('div');
+    btn.className = 'spice-btn';
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+    btn.innerHTML = '<span class="ic">' + t.ic + '</span><span class="lb">' + t.lb + '</span>';
+    btn.onclick = function(){
+      if(state.tastes.has(t.id)){ state.tastes.delete(t.id); btn.classList.remove('on'); }
+      else { state.tastes.add(t.id); btn.classList.add('on'); }
+      updatePicked();
+    };
+    wheel.appendChild(btn);
+  });
+
+  function updatePicked(){
+    var el = document.getElementById('pickedTastes');
+    if(state.tastes.size === 0){ el.textContent = 'No flavour selected yet — showing everything.'; return; }
+    el.textContent = 'Chasing: ' + Array.from(state.tastes).map(function(id){
+      return TASTES.find(function(t){return t.id===id;}).lb;
+    }).join(', ');
+  }
+
+  function score(item){
+    if(state.city !== 'All India' && item.region !== state.city) return -1;
+    if(state.veg !== 'any' && item.veg !== state.veg) return -1;
+    if(state.budget !== 0 && item.budget !== state.budget) return -1;
+    var s = 1;
+    if(state.tastes.size > 0){
+      var matched = item.tastes.filter(function(t){ return state.tastes.has(t); }).length;
+      if(matched === 0) return -1;
+      s += matched;
+    }
+    return s;
+  }
+
+  function cardHtml(item){
+    return '<div class="card">'
+      + '<div class="region">' + item.region + '</div>'
+      + '<div class="top"><div class="dish">' + item.dish + '</div><div class="price">' + item.price + '</div></div>'
+      + '<div class="place"><b>' + item.place + '</b></div>'
+      + '<div class="blurb">' + item.blurb + '</div>'
+      + '<div class="tags">'
+      + '<span class="tag ' + (item.veg==='veg'?'veg':'nonveg') + '">' + (item.veg==='veg'?'Veg':'Non-veg') + '</span>'
+      + item.tastes.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('')
+      + '</div>'
+      + '<div class="foot"><span>' + item.cuisine + '</span></div>'
+      + '</div>';
+  }
+
+  function render(list, headline){
+    var results = document.getElementById('results');
+    if(list.length === 0){
+      results.innerHTML = '<div class="empty"><div class="big">No exact match in the dabba</div>Try loosening a filter — fewer spices selected, or "Any budget" usually opens things up.</div>';
+      return;
+    }
+    var html = '<div class="results-head"><div></div><div class="results-count">' + list.length + ' dishes</div></div>';
+    if(headline){
+      html += '<div class="empty" style="margin-bottom:16px;"><div class="big">' + headline + '</div></div>';
+    }
+    html += '<div class="grid">' + list.map(cardHtml).join('') + '</div>';
+    results.innerHTML = html;
+  }
+
+  document.getElementById('findBtn').onclick = function(){
+    var scored = DATA.map(function(d){ return {d:d, s:score(d)}; }).filter(function(x){ return x.s >= 0; });
+    scored.sort(function(a,b){ return b.s - a.s; });
+    var top = scored.slice(0, 10).map(function(x){ return x.d; });
+    if(top.length === 0){
+      var fallback = DATA.filter(function(d){
+        return ["Butter Chicken","Masala Dosa & Filter Coffee","Hyderabadi Biryani","Litti Chokha","Bisi Bele Bath","Rosogolla & Mishti Doi","Dhokla & Thepla","Rogan Josh (Wazwan)"].includes(d.dish);
+      });
+      render(fallback, "No exact match — here's India's crowd-favourites instead");
+    } else {
+      render(top, null);
+    }
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+  };
+
+  document.getElementById('surpriseBtn').onclick = function(){
+    var shuffled = DATA.slice().sort(function(){ return Math.random() - 0.5; });
+    render(shuffled.slice(0,8), null);
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+  };
+
+  document.getElementById('tourBtn').onclick = function(){
+    var seen = {};
+    var oneEach = [];
+    DATA.forEach(function(d){
+      if(!seen[d.region]){ seen[d.region] = true; oneEach.push(d); }
+    });
+    render(oneEach, "One dish from every state & UT — your whole-India tasting menu");
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+  };
+})();
+</script>
+</body>
+</html>
+
